@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Artwin Casino</title>
+<style>
+:root{--bg:#0d0d1a;--card:#151528;--border:#2a2a4a;--accent:#7c3aed;--accent2:#a855f7;--green:#22c55e;--red:#ef4444;--gold:#f59e0b;--text:#e2e8f0;--muted:#64748b;--r:14px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;overflow-x:hidden}
+header{background:linear-gradient(135deg,#1a0533,#0d0d1a);border-bottom:1px solid var(--border);padding:14px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.logo{font-size:1.4rem;font-weight:800;background:linear-gradient(135deg,var(--accent2),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.bpill{background:rgba(124,58,237,.2);border:1px solid var(--accent);border-radius:20px;padding:6px 14px;font-size:.85rem;font-weight:600;display:none}
+.bpill span{color:var(--gold)}
+#uid{font-size:.8rem;color:var(--muted)}
+#auth{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:80vh;gap:24px;padding:20px}
+.ac{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:40px;text-align:center;max-width:400px;width:100%;box-shadow:0 20px 60px rgba(124,58,237,.2)}
+.ac h1{font-size:2rem;margin-bottom:8px;background:linear-gradient(135deg,var(--accent2),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.ac p{color:var(--muted);margin-bottom:28px}
+.note{font-size:.8rem;color:var(--muted);margin-top:14px}
+#main{display:none}
+.tabs{display:flex;gap:4px;padding:16px 20px 0;border-bottom:1px solid var(--border);overflow-x:auto}
+.tab{padding:10px 20px;border-radius:10px 10px 0 0;border:1px solid transparent;border-bottom:none;cursor:pointer;font-weight:600;font-size:.9rem;transition:.2s;white-space:nowrap;color:var(--muted);background:transparent}
+.tab.active{background:var(--card);border-color:var(--border);border-bottom-color:var(--card);color:var(--accent2)}
+.gs{display:none;padding:20px}
+.gs.active{display:block}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:20px;margin-bottom:14px}
+.ct{font-size:1.1rem;font-weight:700;margin-bottom:16px}
+.br{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.bl{color:var(--muted);font-size:.85rem}
+.bi{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-size:1rem;width:110px;outline:none;transition:.2s}
+.bi:focus{border-color:var(--accent)}
+.bbs{display:flex;gap:6px}
+.bb{background:rgba(124,58,237,.15);border:1px solid var(--border);border-radius:6px;padding:7px 12px;color:var(--text);font-size:.8rem;cursor:pointer;transition:.15s}
+.bb:hover{background:rgba(124,58,237,.3);border-color:var(--accent)}
+.btn{padding:12px 28px;border-radius:10px;border:none;font-size:1rem;font-weight:700;cursor:pointer;transition:.2s}
+.bp{background:linear-gradient(135deg,var(--accent),var(--accent2));color:white}
+.bp:hover:not(:disabled){filter:brightness(1.15);transform:translateY(-1px)}
+.bp:disabled{opacity:.5;cursor:not-allowed}
+.bg{background:linear-gradient(135deg,#16a34a,var(--green));color:white}
+.bg:hover:not(:disabled){filter:brightness(1.1);transform:translateY(-1px)}
+.bg:disabled{opacity:.5;cursor:not-allowed}
+.rb{border-radius:10px;padding:14px 18px;font-weight:600;margin-top:14px;display:none;animation:fi .3s}
+.rb.win{background:rgba(34,197,94,.12);border:1px solid var(--green);color:var(--green);display:block}
+.rb.loss{background:rgba(239,68,68,.12);border:1px solid var(--red);color:var(--red);display:block}
+@keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+/* CRASH */
+#cw{position:relative;width:100%;aspect-ratio:16/7;background:linear-gradient(180deg,#0a0a1a,#1a0533);border-radius:12px;overflow:hidden;margin-bottom:14px}
+#cc{width:100%;height:100%}
+#cm{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:clamp(2rem,8vw,4.5rem);font-weight:900;color:white;text-shadow:0 0 30px var(--accent2);pointer-events:none;transition:color .2s}
+#cm.crashed{color:var(--red);text-shadow:0 0 30px var(--red)}
+#ch{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.chp{padding:4px 10px;border-radius:20px;font-size:.75rem;font-weight:700}
+.hi{background:rgba(34,197,94,.15);color:var(--green);border:1px solid rgba(34,197,94,.3)}
+.mi{background:rgba(245,158,11,.15);color:var(--gold);border:1px solid rgba(245,158,11,.3)}
+.lo{background:rgba(239,68,68,.15);color:var(--red);border:1px solid rgba(239,68,68,.3)}
+.cbr{display:flex;gap:10px;margin-top:12px}
+.cbr .btn{flex:1}
+#acr{display:flex;align-items:center;gap:8px;margin-bottom:10px;font-size:.85rem;color:var(--muted)}
+
+/* PLINKO */
+#pw{width:100%;max-width:440px;margin:0 auto 16px}
+#pc{width:100%;display:block;border-radius:12px}
+.pr{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+.rs{background:var(--bg);border:1px solid var(--border);color:var(--text);padding:9px 12px;border-radius:8px;font-size:.9rem;outline:none;cursor:pointer;flex:1}
+.rs:focus{border-color:var(--accent)}
+
+/* ROULETTE */
+#rw{width:100%;max-width:300px;margin:0 auto 16px}
+#rc{width:100%;display:block}
+#rrn{font-size:3rem;font-weight:900;text-align:center;margin:8px 0;min-height:56px}
+.rbts{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:12px}
+.rbt{padding:9px 6px;border-radius:8px;border:2px solid var(--border);text-align:center;cursor:pointer;font-size:.78rem;font-weight:600;transition:.15s;background:var(--bg)}
+.rbt:hover{border-color:var(--accent)}
+.rbt.sel{border-color:var(--accent2);background:rgba(168,85,247,.2);color:var(--accent2)}
+.rbt.r{border-color:rgba(239,68,68,.4)}.rbt.bk{border-color:rgba(100,116,139,.4)}.rbt.gr{border-color:rgba(34,197,94,.4)}
+.rns{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:12px}
+.rn{padding:7px 3px;border-radius:6px;text-align:center;cursor:pointer;font-size:.78rem;font-weight:700;transition:.15s;border:2px solid transparent}
+.rn.r{background:rgba(239,68,68,.2);color:#fca5a5}.rn.b{background:rgba(30,30,50,.7);color:#94a3b8}.rn.g{background:rgba(34,197,94,.2);color:var(--green)}
+.rn:hover{filter:brightness(1.5);border-color:var(--accent)}.rn.sel{border-color:var(--gold);filter:brightness(1.6)}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">🎰 Artwin</div>
+  <div style="display:flex;align-items:center;gap:10px">
+    <div class="bpill" id="bp">💰 <span id="bv">0.00</span>$</div>
+    <div id="uid"></div>
+  </div>
+</header>
+
+<div id="auth">
+  <div class="ac">
+    <h1>Artwin Casino</h1>
+    <p>Войди через Telegram чтобы играть на реальный баланс</p>
+    <div id="tgw"></div>
+    <p class="note">Баланс синхронизируется с ботом</p>
+  </div>
+</div>
+
+<div id="main">
+  <div class="tabs">
+    <div class="tab active" onclick="st('crash')">💥 Краш</div>
+    <div class="tab"        onclick="st('plinko')">🎯 Плинко</div>
+    <div class="tab"        onclick="st('roulette')">🎡 Рулетка</div>
+  </div>
+
+  <!-- CRASH -->
+  <div class="gs active" id="tab-crash">
+    <div class="card">
+      <div class="ct">💥 Краш</div>
+      <div id="ch"></div>
+      <div id="cw"><canvas id="cc"></canvas><div id="cm">1.00×</div></div>
+      <div id="acr">
+        <label>Авто кэшаут:</label>
+        <input type="number" id="ac" class="bi" style="width:90px" placeholder="2.00" min="1.1" step="0.1">
+      </div>
+      <div class="br">
+        <span class="bl">Ставка $</span>
+        <input type="number" id="cbet" class="bi" value="1.00" step="0.1" min="0.1">
+        <div class="bbs">
+          <div class="bb" onclick="mb('cbet',.5)">½</div>
+          <div class="bb" onclick="mb('cbet',2)">×2</div>
+          <div class="bb" onclick="mx('cbet')">MAX</div>
+        </div>
+      </div>
+      <div class="cbr">
+        <button class="btn bp" id="cbtn" onclick="doBet()">🚀 Ставка</button>
+        <button class="btn bg"  id="cobtn" onclick="doCO()" disabled>💰 Кэшаут <span id="con">1.00×</span></button>
+      </div>
+      <div class="rb" id="cres"></div>
+    </div>
+    <div class="card" style="font-size:.8rem;color:var(--muted)">
+      <b style="color:var(--text)">Краш:</b> Сделай ставку → жми Кэшаут до взрыва. Чем дольше ждёшь — тем выше выигрыш и риск. Множитель считается сервером по реальному времени.
+    </div>
+  </div>
+
+  <!-- PLINKO -->
+  <div class="gs" id="tab-plinko">
+    <div class="card">
+      <div class="ct">🎯 Плинко</div>
+      <div id="pw"><canvas id="pc" width="440" height="520"></canvas></div>
+      <div class="pr">
+        <select id="prisk" class="rs" onchange="redrawP()">
+          <option value="0">🔥 Высокий риск</option>
+          <option value="1" selected>⚡ Средний риск</option>
+          <option value="2">🛡️ Низкий риск</option>
+        </select>
+      </div>
+      <div class="br">
+        <span class="bl">Ставка $</span>
+        <input type="number" id="pbet" class="bi" value="1.00" step="0.1" min="0.1">
+        <div class="bbs">
+          <div class="bb" onclick="mb('pbet',.5)">½</div>
+          <div class="bb" onclick="mb('pbet',2)">×2</div>
+          <div class="bb" onclick="mx('pbet')">MAX</div>
+        </div>
+      </div>
+      <button class="btn bp" id="pbtn" onclick="doP()" style="width:100%">🎯 Бросить шар</button>
+      <div class="rb" id="pres"></div>
+    </div>
+  </div>
+
+  <!-- ROULETTE -->
+  <div class="gs" id="tab-roulette">
+    <div class="card">
+      <div class="ct">🎡 Рулетка</div>
+      <div id="rw"><canvas id="rc" width="300" height="300"></canvas></div>
+      <div id="rrn"></div>
+      <div class="br">
+        <span class="bl">Ставка $</span>
+        <input type="number" id="rbet" class="bi" value="1.00" step="0.1" min="0.1">
+        <div class="bbs">
+          <div class="bb" onclick="mb('rbet',.5)">½</div>
+          <div class="bb" onclick="mb('rbet',2)">×2</div>
+          <div class="bb" onclick="mx('rbet')">MAX</div>
+        </div>
+      </div>
+      <div class="rbts">
+        <div class="rbt r"  id="rb-color-red"     onclick="sb('color','red')">🔴 Красное ×2</div>
+        <div class="rbt bk" id="rb-color-black"   onclick="sb('color','black')">⚫ Чёрное ×2</div>
+        <div class="rbt gr" id="rb-number-0"      onclick="sb('number','0')">🟢 Зеро ×36</div>
+        <div class="rbt"    id="rb-even_odd-even" onclick="sb('even_odd','even')">Чёт ×2</div>
+        <div class="rbt"    id="rb-even_odd-odd"  onclick="sb('even_odd','odd')">Нечёт ×2</div>
+        <div class="rbt"    id="rb-half-1-18"     onclick="sb('half','1-18')">1–18 ×2</div>
+        <div class="rbt"    id="rb-half-19-36"    onclick="sb('half','19-36')">19–36 ×2</div>
+        <div class="rbt"    id="rb-dozen-1-12"    onclick="sb('dozen','1-12')">1–12 ×3</div>
+        <div class="rbt"    id="rb-dozen-13-24"   onclick="sb('dozen','13-24')">13–24 ×3</div>
+      </div>
+      <div class="rns" id="rng"></div>
+      <button class="btn bp" id="rbtn" onclick="doR()" style="width:100%">🎡 Крутить</button>
+      <div class="rb" id="rres"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const API="https://worker-production-17eb.up.railway.app";
+const BOT="artwinbot";
+
+let TOKEN=localStorage.getItem("ct")||"";
+let BAL=parseFloat(localStorage.getItem("cb")||"0");
+
+// ── helpers ──
+function mb(id,m){const e=document.getElementById(id);e.value=Math.max(0.1,Math.round(parseFloat(e.value||1)*m*100)/100).toFixed(2)}
+function mx(id){document.getElementById(id).value=BAL.toFixed(2)}
+function setbal(v){BAL=v;document.getElementById("bv").textContent=v.toFixed(2);localStorage.setItem("cb",v)}
+function res(id,won,msg){const e=document.getElementById(id);e.className="rb "+(won?"win":"loss");e.textContent=msg;void e.offsetWidth;e.style.animation="none";void e.offsetWidth;e.style.animation=""}
+function hres(id){document.getElementById(id).className="rb"}
+function st(n){document.querySelectorAll(".tab").forEach((t,i)=>t.classList.toggle("active",["crash","plinko","roulette"][i]===n));document.querySelectorAll(".gs").forEach(s=>s.classList.remove("active"));document.getElementById("tab-"+n).classList.add("active")}
+
+// ── auth ──
+window.onTgAuth=async function(u){
+  try{
+    const r=await fetch(`${API}/api/auth`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(u)});
+    const d=await r.json();
+    if(d.token){
+      TOKEN=d.token;localStorage.setItem("ct",TOKEN);
+      localStorage.setItem("cu",JSON.stringify({name:d.user.name||d.user.username}));
+      setbal(d.user.balance);showMain(d.user.name||d.user.username);
+    }else alert("Ошибка: "+(d.error||"?"));
+  }catch(e){alert("Нет связи с сервером")}
+};
+async function checkToken(){
+  if(!TOKEN)return false;
+  try{
+    const r=await fetch(`${API}/api/user`,{headers:{Authorization:`Bearer ${TOKEN}`}});
+    if(r.status===401){TOKEN="";localStorage.removeItem("ct");return false}
+    const d=await r.json();setbal(d.balance);
+    const s=JSON.parse(localStorage.getItem("cu")||"{}");showMain(s.name||"Игрок");return true;
+  }catch{return false}
+}
+function showMain(name){
+  document.getElementById("auth").style.display="none";
+  document.getElementById("main").style.display="block";
+  document.getElementById("bp").style.display="flex";
+  document.getElementById("uid").textContent=name||"";
+  initP();initR();
+}
+function injectWidget(){
+  const w=document.getElementById("tgw");
+  const s=document.createElement("script");
+  s.async=true;s.src="https://telegram.org/js/telegram-widget.js?22";
+  s.setAttribute("data-telegram-login",BOT);s.setAttribute("data-size","large");
+  s.setAttribute("data-onauth","onTgAuth(user)");s.setAttribute("data-request-access","write");
+  w.appendChild(s);
+}
+
+// ════════════════════════════════════════
+//  CRASH — сервер авторитетен по времени
+// ════════════════════════════════════════
+const CC=document.getElementById("cc"),CX=CC.getContext("2d");
+const CM=document.getElementById("cm");
+let cState="idle",cRAF=null,cPts=[],cMult=1,cHistory=[],cServerMs=0,cLocalOffset=0;
+
+function resCC(){const w=CC.parentElement;CC.width=w.clientWidth;CC.height=w.clientHeight}
+window.addEventListener("resize",resCC);resCC();
+
+// Точно такая же формула как на сервере: e^(0.00007*ms)
+function multAt(ms){return Math.round(Math.exp(0.00007*ms)*100)/100}
+
+function drawCrash(crashed){
+  const W=CC.width,H=CC.height,p=30;
+  CX.clearRect(0,0,W,H);
+  if(!cPts.length)return;
+  const mx=Math.max(...cPts.map(x=>x.x),1),my=Math.max(...cPts.map(x=>x.y),2);
+  const tx=x=>p+(x/mx)*(W-p*2),ty=y=>H-p-(y/my)*(H-p*2);
+
+  // Grid
+  CX.strokeStyle="rgba(255,255,255,.04)";CX.lineWidth=1;
+  for(let i=1;i<=4;i++){
+    const gy=H-p-(i/4)*(H-p*2);
+    CX.beginPath();CX.moveTo(p,gy);CX.lineTo(W-p,gy);CX.stroke();
+    CX.fillStyle="rgba(255,255,255,.25)";CX.font="10px sans-serif";
+    CX.fillText((1+i*(my-1)/4).toFixed(1)+"×",4,gy+4);
+  }
+
+  const col=crashed?"239,68,68":"168,85,247";
+  const gr=CX.createLinearGradient(0,0,0,H);
+  gr.addColorStop(0,`rgba(${col},.25)`);gr.addColorStop(1,`rgba(${col},0)`);
+  CX.fillStyle=gr;
+  CX.beginPath();CX.moveTo(tx(cPts[0].x),ty(cPts[0].y));
+  cPts.forEach(pt=>CX.lineTo(tx(pt.x),ty(pt.y)));
+  CX.lineTo(tx(cPts[cPts.length-1].x),H-p);CX.lineTo(tx(cPts[0].x),H-p);CX.fill();
+
+  CX.strokeStyle=`rgb(${col})`;CX.lineWidth=3;CX.shadowColor=`rgb(${col})`;CX.shadowBlur=10;
+  CX.beginPath();
+  cPts.forEach((pt,i)=>i===0?CX.moveTo(tx(pt.x),ty(pt.y)):CX.lineTo(tx(pt.x),ty(pt.y)));
+  CX.stroke();CX.shadowBlur=0;
+}
+
+function cFrame(){
+  // Вычисляем elapsed по серверному времени
+  const elapsed=Date.now()-cLocalOffset-cServerMs;
+  cMult=multAt(elapsed);
+
+  // Авто-кэшаут
+  const av=parseFloat(document.getElementById("ac").value);
+  if(!isNaN(av)&&av>=1.01&&cMult>=av){doCO();return}
+
+  cPts.push({x:elapsed/1000,y:cMult});
+  if(cPts.length>300)cPts=cPts.filter((_,i)=>i%2===0||i===cPts.length-1);
+  drawCrash(false);
+  CM.textContent=cMult.toFixed(2)+"×";
+  document.getElementById("con").textContent=cMult.toFixed(2)+"×";
+  cRAF=requestAnimationFrame(cFrame);
+}
+
+function setcbtns(){
+  const p=cState==="playing";
+  document.getElementById("cbtn").disabled=p;
+  document.getElementById("cobtn").disabled=!p;
+}
+
+function addCH(m,crashed){
+  cHistory.unshift({m,crashed});if(cHistory.length>12)cHistory.pop();
+  document.getElementById("ch").innerHTML=cHistory.map(h=>{
+    const cls=h.m<1.5?"lo":h.m<3?"mi":"hi";
+    return`<div class="chp ${cls}">${h.m.toFixed(2)}×</div>`;
+  }).join("");
+}
+
+async function doBet(){
+  const bet=parseFloat(document.getElementById("cbet").value);
+  if(isNaN(bet)||bet<0.1)return alert("Мин ставка $0.10");
+  if(bet>BAL)return alert("Недостаточно средств");
+  hres("cres");cState="playing";setcbtns();
+
+  try{
+    const r=await fetch(`${API}/api/crash/start`,{
+      method:"POST",headers:{"Content-Type":"application/json","Authorization":`Bearer ${TOKEN}`},
+      body:JSON.stringify({bet})
+    });
+    const d=await r.json();
+    if(d.error){cState="idle";setcbtns();return alert(d.error)}
+
+    setbal(BAL-bet);
+    cPts=[];CM.classList.remove("crashed");CM.textContent="1.00×";
+
+    // Синхронизируем таймер с сервером
+    // cServerMs = время старта на сервере
+    // cLocalOffset = разница между Date.now() и моментом ответа (учитываем задержку ~RTT/2)
+    cServerMs=d.server_ms;
+    cLocalOffset=Date.now()-d.server_ms; // локальное смещение относительно серверного времени
+
+    cancelAnimationFrame(cRAF);
+    cRAF=requestAnimationFrame(cFrame);
+  }catch(e){cState="idle";setcbtns();alert("Ошибка сети")}
+}
+
+async function doCO(){
+  if(cState!=="playing")return;
+  cancelAnimationFrame(cRAF);
+  cState="idle";setcbtns();
+
+  try{
+    const r=await fetch(`${API}/api/crash/cashout`,{
+      method:"POST",headers:{"Content-Type":"application/json","Authorization":`Bearer ${TOKEN}`},
+      body:"{}",
+    });
+    const d=await r.json();
+    if(d.error){alert(d.error);return}
+
+    setbal(d.balance);
+    addCH(d.crash_point,!d.won);
+
+    // Дорисовываем график до точки краша
+    const elapsed=(d.crash_point/1)*1; // только для визуализации
+    cPts.push({x:cPts.length?cPts[cPts.length-1].x+0.5:0,y:d.crash_point});
+    drawCrash(true);
+    CM.textContent=d.crash_point.toFixed(2)+"×";
+    CM.classList.add("crashed");
+
+    const bet=parseFloat(document.getElementById("cbet").value);
+    if(d.won){
+      const net=d.win_amount-bet;
+      res("cres",true,`🚀 Кэшаут ${d.cashout_at.toFixed(2)}× → +$${net.toFixed(2)}! (краш на ${d.crash_point.toFixed(2)}×)`);
+    }else{
+      res("cres",false,`💥 Крашнулся на ${d.crash_point.toFixed(2)}× — Проигрыш!`);
+    }
+  }catch(e){alert("Ошибка сети")}
+}
+
+// ════════════════════════════════════════
+//  PLINKO — несколько шаров, без линий
+// ════════════════════════════════════════
+const PC=document.getElementById("pc"),PX=PC.getContext("2d");
+const ROWS=16;
+const PM={
+  0:[1000,130,26,9,4,2,0.2,0.2,0.2,0.2,0.2,2,4,9,26,130,1000],
+  1:[110,41,10,5,3,1.5,1,0.5,0.3,0.5,1,1.5,3,5,10,41,110],
+  2:[29,4,1.5,1.2,1.1,1,0.5,0.3,0.5,1,1.1,1.2,1.5,4,29,4,29]
+};
+function mc(m){return m>=100?"#f59e0b":m>=10?"#a855f7":m>=3?"#22c55e":m>=1?"#3b82f6":"#ef4444"}
+function rrect(x,y,w,h,r){PX.beginPath();PX.moveTo(x+r,y);PX.lineTo(x+w-r,y);PX.arcTo(x+w,y,x+w,y+r,r);PX.lineTo(x+w,y+h-r);PX.arcTo(x+w,y+h,x+w-r,y+h,r);PX.lineTo(x+r,y+h);PX.arcTo(x,y+h,x,y+h-r,r);PX.lineTo(x,y+r);PX.arcTo(x,y,x+r,y,r);PX.closePath();PX.fill()}
+
+let pBalls=[]; // [{x,y,vx,vy,path,step,done,slot,mult,bet}]
+let pRaf=null;
+
+function getPad(){
+  const W=PC.width,padX=28,padY=28;
+  const colW=(W-padX*2)/ROWS;
+  const rowH=(PC.height-padY*2-48)/(ROWS+0.5);
+  return{W,H:PC.height,padX,padY,colW,rowH};
+}
+
+function drawPBase(risk,highlights={}){
+  const{W,H,padX,padY,colW,rowH}=getPad();
+  PX.clearRect(0,0,W,H);
+  PX.fillStyle="#0d0d1a";PX.fillRect(0,0,W,H);
+
+  // Pegs
+  for(let row=0;row<=ROWS;row++){
+    const cols=row+1,sx=W/2-(cols-1)*colW/2;
+    for(let col=0;col<cols;col++){
+      const x=sx+col*colW,y=padY+row*rowH;
+      PX.beginPath();PX.arc(x,y,3.5,0,Math.PI*2);
+      PX.fillStyle="#4f46e5";PX.fill();
+    }
+  }
+
+  // Buckets
+  const mults=PM[risk]||PM[1];
+  const bw=(W-padX*2)/mults.length;
+  mults.forEach((m,i)=>{
+    const bx=padX+i*bw,by=H-48;
+    const active=highlights[i];
+    PX.fillStyle=active?"#fbbf24":mc(m);
+    PX.globalAlpha=active?1:0.75;
+    rrect(bx+1,by,bw-2,32,5);
+    PX.globalAlpha=1;
+    PX.fillStyle="white";
+    PX.font=`bold ${m>=100?8:10}px sans-serif`;
+    PX.textAlign="center";PX.textBaseline="middle";
+    PX.fillText(m+"×",bx+bw/2,by+16);
+  });
+}
+
+function drawBalls(risk){
+  const{W,H,padX,padY,colW,rowH}=getPad();
+  const mults=PM[risk]||PM[1];
+  const bw=(W-padX*2)/mults.length;
+  const highlights={};
+
+  pBalls.forEach(b=>{
+    if(b.done)highlights[b.slot]=true;
+    // Draw ball
+    PX.beginPath();PX.arc(b.x,b.y,8,0,Math.PI*2);
+    PX.fillStyle=b.done?"#22c55e":"#fbbf24";
+    PX.shadowColor=b.done?"#22c55e":"#fbbf24";PX.shadowBlur=12;
+    PX.fill();PX.shadowBlur=0;
+  });
+  return highlights;
+}
+
+function pegPositions(risk){
+  const{W,padX,padY,colW,rowH}=getPad();
+  const rows=[];
+  for(let row=0;row<=ROWS;row++){
+    const cols=row+1,sx=W/2-(cols-1)*colW/2;
+    const r=[];for(let col=0;col<cols;col++)r.push({x:sx+col*colW,y:padY+row*rowH});
+    rows.push(r);
+  }
+  return rows;
+}
+
+function plinkoLoop(){
+  const risk=parseInt(document.getElementById("prisk").value);
+  const pegs=pegPositions(risk);
+  const{W,H,padX,padY,colW,rowH}=getPad();
+  const mults=PM[risk]||PM[1];
+  const bw=(W-padX*2)/mults.length;
+  const GRAVITY=0.35,BOUNCE=0.4,SPEED=3.5;
+
+  pBalls.forEach(b=>{
+    if(b.done)return;
+    b.vy+=GRAVITY;
+    b.x+=b.vx;b.y+=b.vy;
+
+    // Check peg collision
+    const row=Math.round((b.y-padY)/rowH);
+    if(row>=0&&row<=ROWS){
+      pegs[Math.min(row,ROWS)].forEach(peg=>{
+        const dx=b.x-peg.x,dy=b.y-peg.y;
+        const dist=Math.sqrt(dx*dx+dy*dy);
+        if(dist<12){
+          // Bounce off peg
+          const nx=dx/dist,ny=dy/dist;
+          const speed=Math.sqrt(b.vx*b.vx+b.vy*b.vy);
+          b.vx=(nx*speed+( Math.random()-.4)*2)*BOUNCE;
+          b.vy=Math.abs(ny*speed*BOUNCE)+0.5;
+          b.x=peg.x+nx*13;b.y=peg.y+ny*13;
+        }
+      });
+    }
+
+    // Wall bounce
+    if(b.x<padX+8){b.x=padX+8;b.vx=Math.abs(b.vx)}
+    if(b.x>W-padX-8){b.x=W-padX-8;b.vx=-Math.abs(b.vx)}
+
+    // Reached buckets
+    if(b.y>=H-50){
+      b.y=H-50;b.done=true;
+      b.slot=Math.min(Math.floor((b.x-padX)/bw),mults.length-1);
+      b.slot=Math.max(0,b.slot);
+      b.mult=mults[b.slot];
+    }
+  });
+
+  // Draw
+  const highlights={};
+  pBalls.filter(b=>b.done).forEach(b=>highlights[b.slot]=true);
+  drawPBase(risk,highlights);
+  pBalls.forEach(b=>{
+    PX.beginPath();PX.arc(b.x,b.y,8,0,Math.PI*2);
+    PX.fillStyle=b.done?"#22c55e":"#fbbf24";
+    PX.shadowColor=b.done?"#22c55e":"#fbbf24";PX.shadowBlur=12;
+    PX.fill();PX.shadowBlur=0;
+  });
+
+  // Remove finished balls after 1.5s
+  const now=Date.now();
+  pBalls=pBalls.filter(b=>!b.done||(now-b.finishTime<1500));
+  pBalls.filter(b=>b.done&&!b.finishTime).forEach(b=>{b.finishTime=now});
+
+  if(pBalls.length>0){
+    pRaf=requestAnimationFrame(plinkoLoop);
+  }else{
+    pRaf=null;
+    drawPBase(parseInt(document.getElementById("prisk").value));
+  }
+}
+
+function initP(){drawPBase(parseInt(document.getElementById("prisk").value))}
+function redrawP(){if(!pRaf)drawPBase(parseInt(document.getElementById("prisk").value))}
+
+async function doP(){
+  const bet=parseFloat(document.getElementById("pbet").value);
+  const risk=parseInt(document.getElementById("prisk").value);
+  if(isNaN(bet)||bet<0.1)return alert("Мин ставка $0.10");
+  if(bet>BAL)return alert("Недостаточно средств");
+  hres("pres");
+
+  try{
+    const r=await fetch(`${API}/api/plinko/play`,{
+      method:"POST",headers:{"Content-Type":"application/json","Authorization":`Bearer ${TOKEN}`},
+      body:JSON.stringify({bet,risk})
+    });
+    const d=await r.json();
+    if(d.error)return alert(d.error);
+    setbal(d.balance);
+
+    // Запускаем шар с физикой — начинает сверху по центру
+    const{W,padX,padY}=getPad();
+    pBalls.push({
+      x:W/2+(Math.random()-.5)*4,y:padY-10,
+      vx:(Math.random()-.5)*1,vy:0,
+      done:false,slot:-1,mult:d.multiplier,bet,
+      serverSlot:d.slot,serverMult:d.multiplier,net:d.net
+    });
+
+    if(!pRaf)pRaf=requestAnimationFrame(plinkoLoop);
+
+    // Показываем результат
+    const won=d.net>0;
+    setTimeout(()=>{
+      res("pres",won,
+        won?`✅ ×${d.multiplier} → +$${d.net.toFixed(2)}`
+           :d.multiplier>0?`🔸 ×${d.multiplier} → $${(bet+d.net).toFixed(2)}`:`❌ ×${d.multiplier}`
+      );
+    },1500);
+  }catch(e){alert("Ошибка сети")}
+}
+
+// ════════════════════════════════════════
+//  ROULETTE
+// ════════════════════════════════════════
+const RC=document.getElementById("rc"),RX=RC.getContext("2d");
+const WHEEL=[0,32,15,19,4,21,2,25,17,34,6,27,13,36,11,30,8,23,10,5,24,16,33,1,20,14,31,9,22,18,29,7,28,12,35,3,26];
+const REDS=new Set([1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36]);
+let rAngle=0;
+let sType=null,sVal=null;
+
+function nc(n){return n===0?"#16a34a":REDS.has(n)?"#ef4444":"#1e293b"}
+
+function drawWheel(a){
+  const W=RC.width,H=RC.height,cx=W/2,cy=H/2,R=W/2-8;
+  const seg=Math.PI*2/WHEEL.length;
+  RX.clearRect(0,0,W,H);
+  WHEEL.forEach((n,i)=>{
+    const a0=a+i*seg-Math.PI/2;
+    RX.beginPath();RX.moveTo(cx,cy);RX.arc(cx,cy,R,a0,a0+seg);RX.closePath();
+    RX.fillStyle=nc(n);RX.fill();
+    RX.strokeStyle="#0d0d1a";RX.lineWidth=1;RX.stroke();
+    RX.save();RX.translate(cx,cy);RX.rotate(a0+seg/2);RX.translate(R*0.72,0);
+    RX.fillStyle="white";RX.font=`bold ${W<260?7:9}px sans-serif`;
+    RX.textAlign="center";RX.textBaseline="middle";RX.fillText(n,0,0);RX.restore();
+  });
+  RX.beginPath();RX.arc(cx,cy,R,0,Math.PI*2);RX.strokeStyle="#4f46e5";RX.lineWidth=5;RX.stroke();
+  RX.beginPath();RX.arc(cx,cy,12,0,Math.PI*2);RX.fillStyle="#1e1b4b";RX.fill();
+  RX.strokeStyle="#4f46e5";RX.lineWidth=2.5;RX.stroke();
+  RX.beginPath();RX.moveTo(cx,cy-R-2);RX.lineTo(cx-7,cy-R+14);RX.lineTo(cx+7,cy-R+14);
+  RX.closePath();RX.fillStyle="#f59e0b";RX.fill();
+}
+
+function initR(){drawWheel(0);buildRN()}
+function buildRN(){
+  const g=document.getElementById("rng");g.innerHTML="";
+  for(let n=0;n<=36;n++){
+    const cls=n===0?"g":REDS.has(n)?"r":"b";
+    const d=document.createElement("div");d.className=`rn ${cls}`;d.textContent=n;d.id=`rn${n}`;
+    d.onclick=()=>sb("number",String(n));g.appendChild(d);
+  }
+}
+function sb(type,val){
+  document.querySelectorAll(".rbt,.rn").forEach(e=>e.classList.remove("sel"));
+  sType=type;sVal=val;
+  const el=document.getElementById(`rb-${type}-${val}`)||document.getElementById(`rn${val}`);
+  if(el)el.classList.add("sel");
+}
+
+async function doR(){
+  if(!sType)return alert("Выберите ставку");
+  const bet=parseFloat(document.getElementById("rbet").value);
+  if(isNaN(bet)||bet<0.1)return alert("Мин ставка $0.10");
+  if(bet>BAL)return alert("Недостаточно средств");
+  document.getElementById("rbtn").disabled=true;
+  hres("rres");document.getElementById("rrn").textContent="";
+
+  try{
+    const r=await fetch(`${API}/api/roulette/play`,{
+      method:"POST",headers:{"Content-Type":"application/json","Authorization":`Bearer ${TOKEN}`},
+      body:JSON.stringify({bet,bet_type:sType,bet_value:sVal})
+    });
+    const d=await r.json();
+    if(d.error)return alert(d.error);
+
+    // Точное вращение — число должно оказаться под указателем
+    const seg=Math.PI*2/WHEEL.length;
+    const idx=WHEEL.indexOf(d.number);
+    // Угол чтобы idx оказался под указателем (top, -PI/2)
+    // current + delta = -idx*seg - seg/2 + 2*PI*N
+    const delta=-rAngle - idx*seg - seg/2 + Math.PI*12; // 6 оборотов
+    const from=rAngle,start=performance.now(),dur=4200;
+
+    function spin(ts){
+      const t=Math.min((ts-start)/dur,1);
+      const e=1-Math.pow(1-t,4);
+      rAngle=from+delta*e;drawWheel(rAngle);
+      if(t<1)requestAnimationFrame(spin);
+      else{
+        setbal(d.balance);
+        const ce=d.color==="red"?"🔴":d.color==="black"?"⚫":"🟢";
+        const rn=document.getElementById("rrn");
+        rn.textContent=`${ce} ${d.number}`;
+        rn.style.color=d.color==="red"?"#ef4444":d.color==="black"?"#94a3b8":"#22c55e";
+        if(d.won)res("rres",true,`✅ Победа! ×${d.multiplier+1} → +$${d.net.toFixed(2)}`);
+        else res("rres",false,`❌ Проигрыш. Выпало ${d.number} (${d.color})`);
+      }
+    }
+    requestAnimationFrame(spin);
+  }catch(e){alert("Ошибка сети")}
+  finally{document.getElementById("rbtn").disabled=false}
+}
+
+// ════════════════════════════════════════
+//  INIT
+// ════════════════════════════════════════
+(async()=>{const ok=await checkToken();if(!ok)injectWidget()})();
+</script>
+</body>
+</html>
